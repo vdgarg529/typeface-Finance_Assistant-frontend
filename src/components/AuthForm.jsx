@@ -121,17 +121,17 @@
 
 // export default AuthForm;
 
-// components/AuthForm.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { setToken } from "../utils/auth";
 import { API_BASE } from "../config";
 
-function AuthForm({ mode = "login", onSuccess }) {
+export default function AuthForm({ mode = "login", onSuccess }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const isLogin = mode === "login";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -139,51 +139,42 @@ function AuthForm({ mode = "login", onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
     try {
-      const endpoint =
-        mode === "login" ? `${API_BASE}/auth/login` : `${API_BASE}/auth/register`;
-
-      const res = await fetch(endpoint, {
+      const response = await fetch(`${API_BASE}/auth/${isLogin ? "login" : "register"}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || "Something went wrong");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Authentication failed");
       }
 
-      const data = await res.json();
-
-      if (mode === "login" && data?.access_token) {
-        setToken(data.access_token, true);
-        onSuccess?.();
+      if (isLogin && data.access_token) {
+        setToken(data.access_token, remember);
+        onSuccess();
         navigate("/");
-      } else if (mode === "register") {
-        // After register, redirect to login
+      } else if (!isLogin) {
+        // After registration, redirect to login
         navigate("/login");
       }
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      setError(err.message || "Something went wrong");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          {mode === "login" ? "Login" : "Register"}
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6">
+          {isLogin ? "Login" : "Register"}
         </h2>
 
-        {error && (
-          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
-        )}
+        {error && <p className="text-red-500 mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -192,34 +183,42 @@ function AuthForm({ mode = "login", onSuccess }) {
             placeholder="Username"
             value={formData.username}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
             required
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+
           <input
             type="password"
             name="password"
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"
             required
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+
+          {isLogin && (
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="mr-2"
+              />
+              Remember me
+            </label>
+          )}
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
           >
-            {loading
-              ? "Processing..."
-              : mode === "login"
-              ? "Login"
-              : "Register"}
+            {isLogin ? "Login" : "Register"}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm">
-          {mode === "login" ? (
+        <p className="text-center mt-4">
+          {isLogin ? (
             <>
               Don’t have an account?{" "}
               <Link to="/register" className="text-blue-600 hover:underline">
@@ -239,5 +238,3 @@ function AuthForm({ mode = "login", onSuccess }) {
     </div>
   );
 }
-
-export default AuthForm;

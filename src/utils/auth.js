@@ -24,37 +24,48 @@
 //     return null;
 //   }
 // };
+
+
 // utils/auth.js
 import { jwtDecode } from "jwt-decode";
 
 const TOKEN_KEY = "auth_token";
 
-// Save token to storage
 export const setToken = (token, remember = true) => {
-  if (remember) {
-    localStorage.setItem(TOKEN_KEY, token);
-  } else {
-    sessionStorage.setItem(TOKEN_KEY, token);
+  try {
+    if (remember) {
+      localStorage.setItem(TOKEN_KEY, token);
+    } else {
+      sessionStorage.setItem(TOKEN_KEY, token);
+    }
+  } catch (err) {
+    console.error("Error saving token:", err);
   }
 };
 
-// Get token from storage
 export const getToken = () => {
-  return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+  try {
+    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+  } catch (err) {
+    console.error("Error reading token:", err);
+    return null;
+  }
 };
 
-// Remove token from both storages
 export const removeToken = () => {
-  localStorage.removeItem(TOKEN_KEY);
-  sessionStorage.removeItem(TOKEN_KEY);
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+  } catch (err) {
+    console.error("Error removing token:", err);
+  }
 };
 
-// Check if user is authenticated
 export const isAuthenticated = () => {
   return !!getToken();
 };
 
-// Extract username from token (sub claim)
+// ✅ Extract username from JWT token ("sub" is usually the username/ID)
 export const getUsernameFromToken = () => {
   try {
     const token = getToken();
@@ -63,7 +74,7 @@ export const getUsernameFromToken = () => {
     const decoded = jwtDecode(token);
     return decoded?.sub || null;
   } catch (err) {
-    console.error("Invalid token:", err);
+    console.error("Invalid token", err);
     return null;
   }
 };
