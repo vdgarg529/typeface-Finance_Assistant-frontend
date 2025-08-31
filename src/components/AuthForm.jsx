@@ -121,40 +121,36 @@
 
 // export default AuthForm;
 
-
-
-
-
 // components/AuthForm.jsx
 import React, { useState } from "react";
 import { login, register } from "../utils/auth";
-import { setToken } from "../utils/token";
 
-const AuthForm = () => {
+const AuthForm = ({ onSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       if (isLogin) {
-        // ✅ Login (x-www-form-urlencoded)
-        const data = await login(username, password);
-        setToken(data.access_token);
-        window.location.href = "/"; // redirect after login
+        await login(username, password);
+        onSuccess(); // Call the success callback
       } else {
-        // ✅ Register (JSON)
         await register(username, password);
         alert("Registration successful! Please log in.");
-        setIsLogin(true);
+        setIsLogin(true); // Switch to login form
       }
     } catch (err) {
       console.error("Auth error:", err);
-      setError("Invalid credentials or server error.");
+      setError(err.response?.data?.detail || "Invalid credentials or server error.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -184,9 +180,10 @@ const AuthForm = () => {
           />
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white rounded py-2 hover:bg-blue-600"
+            disabled={loading}
+            className="w-full bg-blue-500 text-white rounded py-2 hover:bg-blue-600 disabled:opacity-50"
           >
-            {isLogin ? "Login" : "Register"}
+            {loading ? "Processing..." : isLogin ? "Login" : "Register"}
           </button>
         </form>
         <p className="text-center mt-4">
