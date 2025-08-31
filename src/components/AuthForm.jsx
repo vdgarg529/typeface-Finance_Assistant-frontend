@@ -121,120 +121,86 @@
 
 // export default AuthForm;
 
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { setToken } from "../utils/auth";
-import { API_BASE } from "../config";
 
-export default function AuthForm({ mode = "login", onSuccess }) {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({ username: "", password: "" });
+
+
+
+// components/AuthForm.jsx
+import React, { useState } from "react";
+import { login, register } from "../utils/auth";
+import { setToken } from "../utils/token";
+
+const AuthForm = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [remember, setRemember] = useState(true);
-  const isLogin = mode === "login";
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      const response = await fetch(`${API_BASE}/auth/${isLogin ? "login" : "register"}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || "Authentication failed");
-      }
-
-      if (isLogin && data.access_token) {
-        setToken(data.access_token, remember);
-        onSuccess();
-        navigate("/");
-      } else if (!isLogin) {
-        // After registration, redirect to login
-        navigate("/login");
+      if (isLogin) {
+        // ✅ Login (x-www-form-urlencoded)
+        const data = await login(username, password);
+        setToken(data.access_token);
+        window.location.href = "/"; // redirect after login
+      } else {
+        // ✅ Register (JSON)
+        await register(username, password);
+        alert("Registration successful! Please log in.");
+        setIsLogin(true);
       }
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      console.error("Auth error:", err);
+      setError("Invalid credentials or server error.");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold mb-4 text-center">
           {isLogin ? "Login" : "Register"}
         </h2>
-
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-
+        {error && <p className="text-red-500 text-center mb-2">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="username"
             placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border rounded px-3 py-2"
           />
-
           <input
             type="password"
-            name="password"
             placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border rounded px-3 py-2"
           />
-
-          {isLogin && (
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className="mr-2"
-              />
-              Remember me
-            </label>
-          )}
-
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+            className="w-full bg-blue-500 text-white rounded py-2 hover:bg-blue-600"
           >
             {isLogin ? "Login" : "Register"}
           </button>
         </form>
-
         <p className="text-center mt-4">
-          {isLogin ? (
-            <>
-              Don’t have an account?{" "}
-              <Link to="/register" className="text-blue-600 hover:underline">
-                Register
-              </Link>
-            </>
-          ) : (
-            <>
-              Already have an account?{" "}
-              <Link to="/login" className="text-blue-600 hover:underline">
-                Login
-              </Link>
-            </>
-          )}
+          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+          <button
+            className="text-blue-500 underline"
+            onClick={() => setIsLogin(!isLogin)}
+          >
+            {isLogin ? "Register here" : "Login here"}
+          </button>
         </p>
       </div>
     </div>
   );
-}
+};
+
+export default AuthForm;
