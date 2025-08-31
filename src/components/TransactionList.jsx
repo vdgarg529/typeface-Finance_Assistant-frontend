@@ -21,13 +21,13 @@ const TransactionList = ({ filters, refreshTrigger }) => {
     try {
       setLoading(true);
       
-      // Build query parameters, excluding empty values
+      
       const params = new URLSearchParams({
         page: pagination.page,
         limit: pagination.limit
       });
       
-      // Add filters only if they have values
+      
       Object.entries(filters).forEach(([key, value]) => {
         if (value) {
           params.append(key, value);

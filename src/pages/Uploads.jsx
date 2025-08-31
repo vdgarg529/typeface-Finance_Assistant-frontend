@@ -3,7 +3,7 @@ import FileUpload from '../components/FileUpload';
 const Uploads = () => {
   const handleUploadComplete = (data) => {
     console.log('Upload completed:', data);
-    // You could trigger a refresh of transactions here if needed
+    
   };
 
   return (

@@ -1,4 +1,4 @@
-// utils/token.js
+
 export const getToken = () => {
   return sessionStorage.getItem('pfa_token');
 };

@@ -1,30 +1,3 @@
-
-// // Token management utilities
-// export const getToken = () => {
-//   return sessionStorage.getItem('pfa_token');
-// };
-
-// export const setToken = (token) => {
-//   sessionStorage.setItem('pfa_token', token);
-// };
-
-// export const removeToken = () => {
-//   sessionStorage.removeItem('pfa_token');
-// };
-
-// export const getUsernameFromToken = () => {
-//   const token = getToken();
-//   if (!token) return null;
-  
-//   try {
-//     const payload = JSON.parse(atob(token.split('.')[1]));
-//     return payload.sub || null;
-//   } catch (error) {
-//     console.error('Error decoding token:', error);
-//     return null;
-//   }
-// };
-// utils/auth.js
 import axios from "axios";
 import { API_BASE } from '../config';
 import { setToken } from './token'; // Import setToken
@@ -59,7 +32,7 @@ export const login = async (username, password) => {
     
     console.log("Login response:", response.data);
     
-    // Set the token after successful login
+    
     if (response.data.access_token) {
       setToken(response.data.access_token);
       console.log("Token set successfully");
