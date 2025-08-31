@@ -37,7 +37,7 @@
 
 
 import axios from 'axios';
-import { getToken, removeToken } from './auth';
+import { getToken, removeToken } from './token';
 import { API_BASE } from '../config';
 
 // Create axios instance
