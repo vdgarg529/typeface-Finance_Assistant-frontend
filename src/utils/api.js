@@ -35,15 +35,14 @@
 
 // export default api;
 
-
 import axios from 'axios';
-import { getToken, removeToken } from './token';
+import { getToken, removeToken } from './token'; // Changed from './auth' to './token'
 import { API_BASE } from '../config';
 
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE,
-  withCredentials: true,   // ✅ ensures cookies (if backend sends them) are included
+  withCredentials: true,
 });
 
 // Request interceptor to add auth token if available

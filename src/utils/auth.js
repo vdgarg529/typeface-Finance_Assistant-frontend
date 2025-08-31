@@ -25,11 +25,8 @@
 //   }
 // };
 
-
-// utils/auth.js
 import axios from "axios";
-import { API_BASE } from '../config';
-import { setToken } from './token';
+import { API_BASE } from '../config'; // Import from config instead of hardcoding
 
 export const register = async (username, password) => {
   try {
@@ -55,26 +52,9 @@ export const login = async (username, password) => {
         "Content-Type": "application/x-www-form-urlencoded",
       },
     });
-    
-    // Set the token after successful login
-    if (response.data.access_token) {
-      setToken(response.data.access_token);
-    }
-    
     return response.data;
   } catch (error) {
     console.error("Login error:", error.response?.data || error.message);
     throw error;
   }
-};
-
-// Check if user is authenticated
-export const isAuthenticated = () => {
-  return !!getToken();
-};
-
-// Logout function
-export const logout = () => {
-  removeToken();
-  window.location.href = '/login';
 };
