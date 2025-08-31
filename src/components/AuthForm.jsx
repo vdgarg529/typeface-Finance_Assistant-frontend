@@ -139,15 +139,19 @@ const AuthForm = ({ onSuccess }) => {
 
     try {
       if (isLogin) {
-        await login(username, password);
+        console.log("Attempting login with:", username);
+        const data = await login(username, password);
+        console.log("Login successful, data:", data);
         onSuccess(); // Call the success callback
       } else {
+        console.log("Attempting registration with:", username);
         await register(username, password);
         alert("Registration successful! Please log in.");
         setIsLogin(true); // Switch to login form
       }
     } catch (err) {
-      console.error("Auth error:", err);
+      console.error("Auth error details:", err);
+      console.error("Auth error response:", err.response);
       setError(err.response?.data?.detail || "Invalid credentials or server error.");
     } finally {
       setLoading(false);
@@ -160,7 +164,11 @@ const AuthForm = ({ onSuccess }) => {
         <h2 className="text-2xl font-bold mb-4 text-center">
           {isLogin ? "Login" : "Register"}
         </h2>
-        {error && <p className="text-red-500 text-center mb-2">{error}</p>}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"

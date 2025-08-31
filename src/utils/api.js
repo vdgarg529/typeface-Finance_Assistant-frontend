@@ -33,8 +33,7 @@
 //   }
 // );
 
-// export default api;
-
+// utils/api.js
 import axios from 'axios';
 import { getToken, removeToken } from './token'; // Changed from './auth' to './token'
 import { API_BASE } from '../config';
