@@ -25,56 +25,27 @@
 //   }
 // };
 
+import axios from "axios";
 
-// utils/auth.js
-import { jwtDecode } from "jwt-decode";
+const API_URL = "http://127.0.0.1:8000";
 
-const TOKEN_KEY = "auth_token";
-
-export const setToken = (token, remember = true) => {
-  try {
-    if (remember) {
-      localStorage.setItem(TOKEN_KEY, token);
-    } else {
-      sessionStorage.setItem(TOKEN_KEY, token);
-    }
-  } catch (err) {
-    console.error("Error saving token:", err);
-  }
+export const register = async (username, password) => {
+  const response = await axios.post(`${API_URL}/auth/register`, {
+    username,
+    password,
+  });
+  return response.data;
 };
 
-export const getToken = () => {
-  try {
-    return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
-  } catch (err) {
-    console.error("Error reading token:", err);
-    return null;
-  }
-};
+export const login = async (username, password) => {
+  const params = new URLSearchParams();
+  params.append("username", username);
+  params.append("password", password);
 
-export const removeToken = () => {
-  try {
-    localStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
-  } catch (err) {
-    console.error("Error removing token:", err);
-  }
-};
-
-export const isAuthenticated = () => {
-  return !!getToken();
-};
-
-// ✅ Extract username from JWT token ("sub" is usually the username/ID)
-export const getUsernameFromToken = () => {
-  try {
-    const token = getToken();
-    if (!token) return null;
-
-    const decoded = jwtDecode(token);
-    return decoded?.sub || null;
-  } catch (err) {
-    console.error("Invalid token", err);
-    return null;
-  }
+  const response = await axios.post(`${API_URL}/auth/login`, params, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  });
+  return response.data;
 };
